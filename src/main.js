@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import App from './App.vue'
+import 'amfe-flexible'
 const _IS_MOBILE = /mobile|table|ip(ad|hone|od)|android/i.test(navigator.userAgent)
 Vue.directive('tap', {
   bind: function (el, binding) {

@@ -2,25 +2,25 @@ var path = require('path')
 var webpack = require('webpack')
 var NODE_ENV = process.env.NODE_ENV;
 module.exports = {
-  // entry: './src/main.js',
-  entry: NODE_ENV == 'development' ? './src/main.js' :'./index.js',
+  entry: './src/main.js',
+  // entry: NODE_ENV == 'development' ? './src/main.js' :'./index.js',
   output: {
     path: path.resolve(__dirname, './dist'),
     publicPath: '/dist/',
-    // filename: 'build.js',
-    filename: 'bl-keyboard.js',
-    library: 'bl-keyboard',
-    libraryTarget: "umd",
-    umdNamedDefine: true
+    filename: 'build.js',
+    // filename: 'bl-keyboard.js',
+    // library: 'bl-keyboard',
+    // libraryTarget: "umd",
+    // umdNamedDefine: true
   },
-  externals: {
-    vue: {
-      root: 'Vue',
-      commonjs: 'vue',
-      commonjs2: 'vue',
-      amd: 'vue'
-    }
-  },
+  // externals: {
+  //   vue: {
+  //     root: 'Vue',
+  //     commonjs: 'vue',
+  //     commonjs2: 'vue',
+  //     amd: 'vue'
+  //   }
+  // },
   module: {
     rules: [
       {
