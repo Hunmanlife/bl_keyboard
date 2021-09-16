@@ -1,13 +1,38 @@
 <template>
-  <div class="bl-keyboard-container" v-if="show">
-    <key-board-view
-      :toggle="toggle"
-      :selectedIndex="selectedIndex"
-      v-on:onChangeProvinceCode="onButtonClick"
-      v-on:onButtonClick="onButtonClick"
-      v-on:onClose="onClose"
-      v-on:onToggleSystem="onToggleSystem"
-    ></key-board-view>
+  <div class="bl-keyboard-container">
+    <div class="bl-keyboard-template">
+      <div class="license-plate-container">
+        <div class="lp-item"
+             v-for="(item,i) in currentCarNumber"
+             :class="{'lp-item-active':i === selectedIndex}"
+             @click="handleClick(i)"
+        >
+          <input
+            v-if="isSystemEnabled && i === selectedIndex"
+            type="text"
+            :value="item"
+            class="lp-item__input"
+            maxlength="1"
+            v-focus
+            @input="onInputChange($event,i)"
+            ref="inputName"/>
+          <span v-text="item"
+                :class="{'lp-item-last':isItEmpty}"
+                v-else-if="i === len"></span>
+          <span v-text="item" v-else></span>
+        </div>
+      </div>
+    </div>
+    <div class="bl-keyboard" v-if="show">
+      <key-board-view
+        :toggle="toggle"
+        :selectedIndex="selectedIndex"
+        v-on:onChangeProvinceCode="onButtonClick"
+        v-on:onButtonClick="onButtonClick"
+        v-on:onClose="onClose"
+        v-on:onToggleSystem="onToggleSystem"
+      ></key-board-view>
+    </div>
   </div>
 </template>
 
@@ -30,27 +55,33 @@ const browser = {
   } (),
   language: (navigator.browserLanguage || navigator.language).toLowerCase()
 };
+function isArray(o) {
+  return Object.prototype.toString.call(o);
+}
 import KeyBoardView from './KeyboardView'
 export default {
   name: 'BLKeyboard',
   props: {
-    tmp: {
+    tmp: {// 模板。默认方块
       type: String,
       default: 'square'
     },
-    show: Boolean,
+    show: {
+      required: true,
+      type: Boolean,
+      default: false
+    },// 显示车牌键盘
     toggle: {// 是否显示切换系统键盘按钮
       type: Boolean,
       default: true
     },
-    index: Number,
-    maxlength: {
-      type: Number,
-      default: 8
-    },
+    index: Number,// 光标下标
     value: {
+      required: true,
       type: [String, Array],
-      default: ''
+      default: () =>{
+        return ['','','','','','','','']
+      }
     },
     defaultConf: {
       type: Object,
@@ -66,6 +97,16 @@ export default {
     return {
       readonly: true,
       currentCarNumber: '',
+      selectedIndex: this.index || 0,
+      isSystemEnabled: false,
+      len: 7,// 车牌号长度 - 固定从零开始
+    }
+  },
+  directives: {
+    focus: {
+      inserted: function (el) {
+        el.focus();
+      }
     }
   },
   components: {
@@ -100,11 +141,27 @@ export default {
 
   },
   computed: {
-    selectedIndex: function () {
-      return this.index || 0;
+    isItEmpty:function () {
+      let len = this.currentCarNumber.length;
+      return this.currentCarNumber[len - 1] === "";
     }
   },
   methods: {
+    // 键盘的点击事件
+    handleClick(index) {
+      this.isSystemEnabled = false;
+      this.selectedIndex = index;
+      this.onOpen();
+    },
+    // 系统键盘输入的内容
+    onInputChange(evt,index) {
+      this.$set(this.currentCarNumber,index, evt.data);
+      this.$emit('change', {
+        data: this.currentCarNumber,
+        index: index,
+        delete: false
+      });
+    },
     focusLast (e) {
       let obj = e.srcElement;
       obj.focus();
@@ -116,19 +173,36 @@ export default {
     },
     // 切换系统键盘
     onToggleSystem() {
-      this.$emit('toggle')
+      this.onClose();
+      this.isSystemEnabled = true;
     },
-
+    onOpen() {
+      this.$emit('update:show', true);
+      this.$emit('onopen');
+    },
     onClose () {
-      this.$emit('update:showKeyboard', false);
+      this.$emit('update:show', false);
       this.$emit('onclose');
     },
     onButtonClick (params) {
-      if (params.name === 'DEL') {
+      if (params.name === 'DEL' && this.selectedIndex !== 0) {
         this.currentCarNumber.splice(this.selectedIndex,1,'');
-      } else {
-        this.currentCarNumber[this.selectedIndex] = params.name;
+        this.selectedIndex -=1;
       }
+      else if (params.name === 'DEL' && this.selectedIndex === 0) {
+        this.currentCarNumber.splice(this.selectedIndex,1,'');
+      }
+      else if (this.selectedIndex !== this.len) {
+        this.$set(this.currentCarNumber, this.selectedIndex, params.name);
+        this.selectedIndex +=1;
+      }
+      else if (this.selectedIndex === this.len) {
+        this.$set(this.currentCarNumber, this.selectedIndex, params.name);
+      }
+      else {
+        return false;
+      }
+
       this.$emit('change', {
         data: this.currentCarNumber,
         index: this.selectedIndex,
@@ -141,8 +215,12 @@ export default {
       handler: function (n) {
         if (typeof n === "string") {
 
-        } else if (typeof n === "object") {
-          this.currentCarNumber = n
+        }
+        else if (isArray(n) === "[object Array]") {
+          this.currentCarNumber = n;
+        }
+        else {
+          console.error("BlKeyboard unknown type,Please check the value type")
         }
 
       },

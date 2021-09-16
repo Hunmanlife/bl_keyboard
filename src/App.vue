@@ -2,28 +2,7 @@
   <div id="app">
 <!--    <img alt="Vue logo" src="./assets/logo.png">-->
     <div class="license-plate-panel">
-      <div class="lp-text"></div>
-      <div class="license-plate-container">
-        <div class="lp-item"
-             v-for="(item,index) in numberPlateGroup"
-             :class="{'lp-item-active':index === currentIndex}"
-             @click="handleClick(index)"
-        >
-          <input
-            v-if="isSystemEnabled && index === currentIndex"
-            type="text"
-           :value="item"
-           class="lp-item__input"
-           maxlength="1"
-           v-focus
-            @input="onInputChange($event,index)"
-           ref="inputName"/>
-          <span v-text="item"
-                :class="{'lp-item-last':isItEmpty}"
-                v-else-if="index === len"></span>
-          <span v-text="item" v-else></span>
-        </div>
-      </div>
+      <div class="lp-text">{{numberPlateGroup}}</div>
       <div>
         <input type="text">
         <input type="text">
@@ -34,15 +13,16 @@
 <!--      <span class="label">车牌号码</span>-->
 <!--      <bl-keyboard :value="value" v-on:change="onChange"></bl-keyboard>-->
 <!--    </div>-->
-    <bl-keyboard
-      :toggle="true"
-      :index = "currentIndex"
-      :value="numberPlateGroup"
-      :show.sync="isBlKeyboard"
-      v-on:change="onChange"
-      v-on:toggle="toggleSystem"
-      v-on:onclose="onClose"
-      ref="blKeyboard"></bl-keyboard>
+    <div class="bl-key-container">
+      <bl-keyboard
+        :index = "currentIndex"
+        :value="numberPlateGroup"
+        :show.sync="isBlKeyboard"
+        v-on:change="onChange"
+        v-on:onclose="onClose"
+        ref="blKeyboard"></bl-keyboard>
+    </div>
+
   </div>
 </template>
 
@@ -60,53 +40,18 @@ export default {
       numberPlateGroup: ['','','','','','','',''],
     }
   },
-  directives: {
-    focus: {
-      inserted: function (el) {
-        el.focus();
-      }
-    }
-  },
+
   components: {
     BlKeyboard
   },
   computed: {
-    isItEmpty:function () {
-      let len = this.numberPlateGroup.length;
-      return this.numberPlateGroup[len - 1] === "";
-    }
   },
   methods: {
-    onInputChange(evt,index) {
-      this.$set(this.numberPlateGroup,index, evt.data);
-    },
     onClose() {
       this.isBlKeyboard = false;
     },
-    toggleSystem() {
-      this.isBlKeyboard = false;
-      this.isSystemEnabled = true;
-    },
-    handleClick(index) {
-      this.isSystemEnabled = false;
-      this.currentIndex = index;
-      this.isBlKeyboard = true;
-    },
     onChange (evt) {
-      this.$set(this.numberPlateGroup, evt.data);
-      if (evt.delete && evt.index !== 0) {
-        this.currentIndex = evt.index - 1;
-      }
-      else if (evt.delete && evt.index === 0) {
-        return false;
-      }
-      else if (evt.index !== this.len) {
-        this.currentIndex = evt.index +1;
-      }
-      else {
-        return false
-      }
-
+      console.log('evt: ',evt);
     }
   }
 }
@@ -130,6 +75,11 @@ html,body {
 }
 .label {
   margin: 0 20px;
+}
+.bl-key-container {
+  position: relative;
+  height: 11.73vw;
+  margin: 0 24px;
 }
 .license-plate-panel {
   margin: 50px auto;
