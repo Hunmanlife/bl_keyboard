@@ -13,14 +13,14 @@ module.exports = {
     libraryTarget: "umd",
     umdNamedDefine: true
   },
-  // externals: {
-  //   vue: {
-  //     root: 'Vue',
-  //     commonjs: 'vue',
-  //     commonjs2: 'vue',
-  //     amd: 'vue'
-  //   }
-  // },
+  externals: {
+    vue: {
+      root: 'Vue',
+      commonjs: 'vue',
+      commonjs2: 'vue',
+      amd: 'vue'
+    }
+  },
   module: {
     rules: [
       {

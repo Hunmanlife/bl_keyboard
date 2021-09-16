@@ -1,7 +1,7 @@
 <template>
   <div class="bl-keyboard-container">
     <div class="bl-keyboard-template">
-      <div class="license-plate-container">
+      <div class="license-plate-container" v-if="tmp === 'square'">
         <div class="lp-item"
              v-for="(item,i) in currentCarNumber"
              :class="{'lp-item-active':i === selectedIndex}"
@@ -21,6 +21,9 @@
                 v-else-if="i === len"></span>
           <span v-text="item" v-else></span>
         </div>
+      </div>
+      <div v-if="tmp==='custom'">
+        <slot></slot>
       </div>
     </div>
     <div class="bl-keyboard" v-if="show">
@@ -213,11 +216,21 @@ export default {
   watch: {
     value: {
       handler: function (n) {
+        let defaultArray = ["","","","","","","",""];
         if (typeof n === "string") {
-
+          if (n !== '') {
+            let arr = n.split("");
+            for (let i =0; i< arr.length; i++) {
+              defaultArray[i] = arr[i];
+            }
+          }
+          this.currentCarNumber = defaultArray;
         }
         else if (isArray(n) === "[object Array]") {
-          this.currentCarNumber = n;
+          for (let i =0; i< n.length; i++) {
+            defaultArray[i] = n[i];
+          }
+          this.currentCarNumber = defaultArray;
         }
         else {
           console.error("BlKeyboard unknown type,Please check the value type")

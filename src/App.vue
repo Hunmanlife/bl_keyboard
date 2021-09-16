@@ -20,7 +20,9 @@
         :show.sync="isBlKeyboard"
         v-on:change="onChange"
         v-on:onclose="onClose"
-        ref="blKeyboard"></bl-keyboard>
+        ref="blKeyboard">
+        <div><input type="text" v-model="numberPlateGroup" :readonly="true" @click="handleInp"></div>
+      </bl-keyboard>
     </div>
 
   </div>
@@ -33,11 +35,11 @@ export default {
   data () {
     return {
       isSystemEnabled: false,
-      isBlKeyboard: false,
+      isBlKeyboard: true,
       currentIndex: 0,
       len: 7,// 车牌号长度
       value: '',
-      numberPlateGroup: ['','','','','','','',''],
+      numberPlateGroup: '',
     }
   },
 
@@ -47,11 +49,15 @@ export default {
   computed: {
   },
   methods: {
+    handleInp() {
+      this.isBlKeyboard = true;
+    },
     onClose() {
       this.isBlKeyboard = false;
     },
     onChange (evt) {
-      console.log('evt: ',evt);
+      console.log('evt: ',evt.data.join(""));
+      this.numberPlateGroup = evt.data.join("");
     }
   }
 }
